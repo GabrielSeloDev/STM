@@ -1,4 +1,4 @@
-name: Build Windows
+name: Build & Release
 
 on:
   push:
@@ -8,7 +8,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-win:
+    name: Build Windows
     runs-on: windows-latest
 
     steps:
@@ -34,3 +35,31 @@ jobs:
         with:
           name: SeloTaskManager-Windows
           path: dist/*.exe
+
+  build-mac:
+    name: Build macOS
+    runs-on: macos-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build & Release (DMG)
+        run: npm run electron:build -- --mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: SeloTaskManager-Mac
+          path: dist/*.dmg
