@@ -1,0 +1,309 @@
+.day-grid {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--bg-primary);
+}
+
+/* ========== Tarefas Dia Inteiro ========== */
+.all-day-tasks {
+    padding: var(--spacing-md);
+    border-bottom: 2px solid var(--border-color);
+    background: var(--bg-secondary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.all-day-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-sm);
+}
+
+.all-day-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.all-day-count {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+    background: rgba(99, 102, 241, 0.1);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+}
+
+.all-day-task-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+/* ========== Container da Grade de Tempo ========== */
+.time-grid-container {
+    flex: 1;
+    position: relative;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+.time-grid-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.time-grid-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.time-grid-container::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 3px;
+}
+
+/* ========== Linha do Tempo Atual ========== */
+.current-time-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.time-indicator {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.time-indicator::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent-primary);
+    box-shadow: 0 0 6px rgba(99, 102, 241, 0.4);
+    z-index: 1;
+}
+
+.time-dot {
+    position: absolute;
+    left: 72px;
+    width: 12px;
+    height: 12px;
+    background: var(--accent-primary);
+    border-radius: 50%;
+    border: 3px solid var(--bg-primary);
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
+    z-index: 2;
+}
+
+.time-indicator .time-label {
+    position: absolute;
+    left: 4px;
+    top: -10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: white;
+    background: var(--accent-primary);
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+    z-index: 2;
+}
+
+/* ========== Grade de Horários ========== */
+.day-time-grid-single-column {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.time-slot {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    min-height: 80px;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+    width: 100%;
+}
+
+.time-slot:hover .time-content-column {
+    background: rgba(99, 102, 241, 0.03);
+}
+
+.time-slot.current .time-content-column {
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.time-slot.past {
+    /* Removido opacity para manter legibilidade */
+}
+
+.time-label-column {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 4px;
+    border-right: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    position: sticky;
+    left: 0;
+}
+
+.hour-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+    line-height: 1.2;
+}
+
+.time-slot.current .hour-label {
+    color: var(--accent-primary);
+    font-weight: 700;
+}
+
+.time-content-column {
+    padding: var(--spacing-sm);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    position: relative;
+}
+
+.hour-tasks {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+/* ========== Cards de Tarefa ========== */
+.day-task-card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border-left: 4px solid var(--accent-primary);
+    border-radius: var(--radius-md);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    transition: all var(--transition-fast);
+    min-height: 40px;
+}
+
+.day-task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.day-task-card.completed {
+    opacity: 0.85;
+    /* Aumentado de 0.6 para melhor visibilidade */
+}
+
+.day-task-card.completed .task-title {
+    text-decoration: line-through;
+    color: var(--text-tertiary);
+}
+
+.day-task-card.all-day {
+    margin-bottom: 0;
+}
+
+.day-task-checkbox {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--accent-primary);
+}
+
+.day-task-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    /* Impede overflow flex */
+}
+
+.task-time-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+    background: rgba(99, 102, 241, 0.12);
+    padding: 2px 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.day-task-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+    /* Garante uma linha apenas com ellipsis se necessário, ou wrap normal */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: normal;
+}
+
+.day-task-title:hover {
+    color: var(--accent-primary);
+}
+
+.btn-delete-task {
+    padding: 4px;
+    background: transparent;
+    border: none;
+    color: var(--text-tertiary);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    opacity: 0;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.day-task-card:hover .btn-delete-task {
+    opacity: 1;
+}
+
+.btn-delete-task:hover {
+    color: var(--danger, #ef4444);
+    transform: scale(1.1);
+}
+
+/* ========== Responsivo ========== */
+@media (max-width: 768px) {
+    .time-slot {
+        grid-template-columns: 60px 1fr;
+        min-height: 70px;
+    }
+
+    .hour-label {
+        font-size: 0.7rem;
+    }
+
+    .time-dot {
+        left: 52px;
+    }
+
+    .day-task-card {
+        padding: 8px 10px;
+    }
+
+    .task-title {
+        font-size: 0.8rem;
+    }
+}

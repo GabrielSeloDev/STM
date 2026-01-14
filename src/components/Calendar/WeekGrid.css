@@ -1,0 +1,208 @@
+/* WeekGrid.css - Styles for weekly calendar view */
+
+.week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--spacing-sm);
+    height: 100%;
+    min-height: 0;
+}
+
+.week-day-column {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+    overflow: hidden;
+}
+
+.week-day-column.today {
+    background: rgba(99, 102, 241, 0.05);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 1px var(--accent-primary);
+}
+
+.week-day-column.selected {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px var(--accent-primary);
+}
+
+.week-day-header {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    position: sticky;
+    top: 0;
+    background: inherit;
+    z-index: 10;
+}
+
+.week-day-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.day-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+}
+
+.day-number {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.week-day-column.today .day-number,
+.week-day-column.today .day-name {
+    color: var(--accent-primary);
+}
+
+.week-header-dots {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.week-group-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.week-dot-more {
+    font-size: 10px;
+    color: var(--text-tertiary);
+}
+
+.week-day-tasks {
+    flex: 1;
+    padding: var(--spacing-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    overflow-y: auto;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    background: var(--bg-tertiary);
+    /* Fundo escuro consistente */
+    /* Custom scrollbar for task list */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+.week-day-tasks:hover {
+    background: rgba(99, 102, 241, 0.02);
+}
+
+/* Customização do TaskItem dentro do WeekGrid para ser mais compacto */
+.week-day-tasks .task-item {
+    padding: 8px;
+    gap: 8px;
+    background: var(--bg-primary);
+    /* Contraste com fundo da coluna */
+    border: 1px solid var(--border-color);
+}
+
+.week-day-tasks .task-item:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-1px);
+}
+
+.week-day-tasks .task-item .task-content {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.week-day-tasks .task-item .task-title {
+    font-size: 13px;
+    margin-right: 4px;
+}
+
+.week-day-tasks .task-item .task-meta-info {
+    width: auto;
+    gap: 4px;
+}
+
+.week-day-tasks .task-item .task-checkbox {
+    width: 16px;
+    height: 16px;
+}
+
+.week-day-tasks .task-item .task-actions {
+    display: none;
+    /* Ocultar ações rápidas na visão semanal para limpar */
+}
+
+/* Mostrar ações apenas no hover se necessário, ou manter oculto para focar na visualização */
+.week-day-tasks .task-item:hover .task-actions {
+    display: flex;
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    background: var(--bg-primary);
+    padding: 2px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.week-day-tasks::-webkit-scrollbar {
+    width: 4px;
+}
+
+.week-day-tasks::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.week-day-tasks::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 4px;
+}
+
+.no-tasks {
+    color: var(--text-tertiary);
+    font-size: 12px;
+    text-align: center;
+    margin-top: var(--spacing-lg);
+    font-style: italic;
+    pointer-events: none;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+    .week-grid {
+        grid-template-columns: repeat(4, 1fr);
+        overflow-y: auto;
+    }
+
+    .week-day-column {
+        min-height: 300px;
+        border-bottom: 1px solid var(--border-color);
+    }
+}
+
+@media (max-width: 768px) {
+    .week-grid {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .week-day-column {
+        border-right: none;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        min-height: auto;
+    }
+}

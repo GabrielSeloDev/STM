@@ -1,0 +1,416 @@
+.calendar-view-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg);
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--spacing-md);
+    width: 100%;
+}
+
+.calendar-controls {
+    justify-self: start;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+}
+
+.calendar-controls::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+}
+
+.view-controls {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+}
+
+.view-controls::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+}
+
+.btn-today {
+    padding: 8px 16px;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.btn-today:hover {
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+}
+
+.date-navigation {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    justify-self: center;
+}
+
+.date-navigation.week-mode {
+    gap: var(--spacing-lg);
+}
+
+.nav-buttons-group {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-tertiary);
+    padding: 4px;
+    border-radius: var(--radius-md);
+}
+
+.btn-nav {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.nav-buttons-group .btn-nav {
+    background: transparent;
+}
+
+.btn-nav:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    transform: scale(1.05);
+}
+
+.current-month {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.view-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.view-mode-selector {
+    display: flex;
+    gap: var(--spacing-xs);
+    background: var(--bg-tertiary);
+    padding: 4px;
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+}
+
+.view-btn {
+    padding: 8px 16px;
+    background: transparent;
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.view-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+}
+
+.view-btn.active {
+    background: var(--accent-primary);
+    color: white;
+}
+
+/* Container principal com grid e painel lateral */
+.calendar-content-wrapper {
+    flex: 1;
+    display: flex;
+    gap: var(--spacing-lg);
+    overflow: hidden;
+    min-height: 0;
+}
+
+.calendar-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: var(--spacing-lg);
+}
+
+/* Garantir que o grid do calendário caiba na tela */
+.calendar-main> :first-child {
+    height: calc(100vh - 200px);
+    max-height: 700px;
+    min-height: 500px;
+    flex-shrink: 0;
+}
+
+/* Seção de metas do mês */
+.month-tasks-section {
+    margin-top: var(--spacing-lg);
+}
+
+/* Painel Lateral */
+.side-panel {
+    width: 380px;
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.side-panel-header {
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-tertiary);
+}
+
+.side-panel-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.side-panel-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.side-panel-close:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.side-panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.task-count {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.tasks-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    background: var(--accent-primary);
+    color: white;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.no-tasks-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    background: var(--bg-tertiary);
+    color: var(--text-tertiary);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.side-panel-tasks {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
+    gap: var(--spacing-md);
+    color: var(--text-tertiary);
+    text-align: center;
+}
+
+.empty-state svg {
+    opacity: 0.5;
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: 14px;
+    font-style: italic;
+}
+
+.tasks-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.empty-message {
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 14px;
+    padding: var(--spacing-lg);
+    font-style: italic;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+    .side-panel {
+        width: 320px;
+    }
+}
+
+@media (max-width: 768px) {
+    .calendar-view-container {
+        padding: var(--spacing-md);
+    }
+
+    .calendar-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .calendar-controls {
+        justify-content: space-between;
+    }
+
+    .current-month {
+        font-size: 18px;
+        min-width: 200px;
+    }
+
+    /* Empilhar verticalmente em mobile */
+    .calendar-content-wrapper {
+        flex-direction: column;
+    }
+
+    .side-panel {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid var(--border-color);
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* Drag & Drop Styles */
+.drop-target-active {
+    position: relative;
+    /* Necessário para o ::after funcionar corretamente */
+    background-color: rgba(99, 102, 241, 0.1) !important;
+    border-color: var(--accent-primary) !important;
+    transition: all var(--transition-fast);
+    z-index: 10;
+    /* Mantém o elemento acima dos outros durante drag */
+}
+
+.drop-target-active::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    /* Pequeno espaço interno para não sobrepor bordas do botão */
+    border: 2px dashed var(--accent-primary);
+    border-radius: var(--radius-md);
+    pointer-events: none;
+    /* Não interfere com eventos de mouse */
+    animation: pulse 1s ease-in-out infinite;
+    z-index: 1;
+    /* Fica acima do conteúdo mas abaixo de outros elementos */
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.4;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+}

@@ -1,0 +1,204 @@
+.task-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    padding-left: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    transition: all var(--transition-fast);
+    animation: fadeIn var(--transition-base) ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.task-color-bar {
+    width: 4px;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.task-item:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.task-item.completed {
+    opacity: 0.6;
+}
+
+.task-item.completed .task-title {
+    text-decoration: line-through;
+    color: var(--text-tertiary);
+}
+
+.task-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: var(--spacing-md);
+}
+
+.task-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--accent-primary);
+    transition: transform var(--transition-fast);
+}
+
+.task-checkbox:hover {
+    transform: scale(1.1);
+}
+
+.task-content {
+    flex: 1;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    /* Manter coluna, mas a meta info fica embaixo */
+    gap: 2px;
+    min-width: 0;
+    /* Crítico para o ellipsis funcionar */
+    align-items: flex-start;
+}
+
+.task-title {
+    font-size: 13px;
+    /* Levemente menor para caber melhor */
+    font-weight: 500;
+    color: var(--text-primary);
+    transition: color var(--transition-fast);
+    /* Correção do Wrap e Ellipsis */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    /* Ocupar largura total disponível */
+    text-align: left;
+    line-height: 1.4;
+}
+
+/* Layout horizontal para título e badge de hora */
+.task-header-line {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 6px;
+}
+
+.task-meta-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.task-time-badge,
+.task-date-badge {
+    font-size: 11px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.task-time-badge {
+    color: var(--accent-primary);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.task-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.task-item:hover .task-actions {
+    opacity: 1;
+}
+
+.task-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.task-btn:hover {
+    background: var(--bg-hover);
+    transform: scale(1.05);
+}
+
+.task-btn-star {
+    color: #fbbf24;
+    opacity: 0.3;
+}
+
+.task-btn-star.active {
+    opacity: 1;
+}
+
+.task-btn-star:hover {
+    opacity: 1;
+    color: #f59e0b;
+}
+
+.task-btn-edit:hover {
+    color: var(--accent-primary);
+}
+
+.task-btn-delete:hover {
+    color: var(--danger);
+}
+
+/* Indicadores de conteúdo rico */
+.task-description-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 6px;
+    font-size: 11px;
+    background: rgba(147, 51, 234, 0.1);
+    color: #a855f7;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+}
+
+.task-description-indicator svg {
+    flex-shrink: 0;
+}
+
+.task-subtasks-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 6px;
+    font-size: 11px;
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+}
+
+.task-subtasks-badge svg {
+    flex-shrink: 0;
+}
