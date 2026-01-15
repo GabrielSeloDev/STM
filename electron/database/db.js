@@ -377,36 +377,37 @@ export class DatabaseManager {
     generateNextRecurringInstance(task) {
         if (!task.dueDate) return
 
+        // Usar UTC para evitar problemas de fuso horário
         const currentDate = new Date(task.dueDate)
         const nextDate = new Date(currentDate)
         const interval = task.recurrenceInterval || 1
 
         if (task.recurrencePattern === 'daily') {
-            nextDate.setDate(currentDate.getDate() + interval)
+            nextDate.setUTCDate(currentDate.getUTCDate() + interval)
         }
         else if (task.recurrencePattern === 'weekly') {
             if (task.recurrenceDays && task.recurrenceDays.length > 0) {
-                const currentDay = currentDate.getDay() // 0-6
+                const currentDay = currentDate.getUTCDay() // 0-6
                 const days = task.recurrenceDays.sort((a, b) => a - b)
                 const nextInWeek = days.find(d => d > currentDay)
 
                 if (nextInWeek !== undefined) {
-                    nextDate.setDate(currentDate.getDate() + (nextInWeek - currentDay))
+                    nextDate.setUTCDate(currentDate.getUTCDate() + (nextInWeek - currentDay))
                 } else {
                     const daysUntilNextSunday = 7 - currentDay
                     const weeksToSkipDays = (interval - 1) * 7
                     const dayOffset = days[0]
-                    nextDate.setDate(currentDate.getDate() + daysUntilNextSunday + weeksToSkipDays + dayOffset)
+                    nextDate.setUTCDate(currentDate.getUTCDate() + daysUntilNextSunday + weeksToSkipDays + dayOffset)
                 }
             } else {
-                nextDate.setDate(currentDate.getDate() + (7 * interval))
+                nextDate.setUTCDate(currentDate.getUTCDate() + (7 * interval))
             }
         }
         else if (task.recurrencePattern === 'monthly') {
-            nextDate.setMonth(currentDate.getMonth() + interval)
+            nextDate.setUTCMonth(currentDate.getUTCMonth() + interval)
         }
         else if (task.recurrencePattern === 'yearly') {
-            nextDate.setFullYear(currentDate.getFullYear() + interval)
+            nextDate.setUTCFullYear(currentDate.getUTCFullYear() + interval)
         }
 
         if (task.recurrenceEndDate) {
@@ -427,6 +428,8 @@ export class DatabaseManager {
             id: undefined,
             isCompleted: false,
             dueDate: nextDateStr,
+            // Importante: limpar dados específicos da instância anterior
+            dueTime: task.dueTime, // Mantém o horário
             createdAt: undefined,
             subtasks: subtasksToCreate,
             parentTaskId: task.id

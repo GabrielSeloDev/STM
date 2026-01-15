@@ -4,7 +4,7 @@ import { TaskList } from './components/Tasks/TaskList'
 import { CalendarView } from './components/Calendar/CalendarView'
 import { Dashboard } from './components/Dashboard/Dashboard'
 import { TaskFormModal } from './components/Tasks/TaskFormModal'
-import { Task, Group } from './types'
+import { Task, Group, TaskInput } from './types'
 import './styles/index.css'
 import './App.css'
 
@@ -35,7 +35,7 @@ function App() {
 
 
     // Handlers
-    const addTask = async (taskData: Partial<Task>) => {
+    const addTask = async (taskData: TaskInput) => {
         try {
             const newTask = await window.electronAPI.addTask(taskData)
             setTasks(prev => [...prev, newTask])
@@ -44,7 +44,7 @@ function App() {
         }
     }
 
-    const updateTask = async (id: string, updates: Partial<Task>) => {
+    const updateTask = async (id: string, updates: TaskInput) => {
         try {
             const updatedTask = await window.electronAPI.updateTask(id, updates)
             setTasks(prev => prev.map(t => t.id === id ? updatedTask : t))
@@ -133,7 +133,7 @@ function App() {
         setIsModalOpen(true)
     }
 
-    const handleSubmitTask = async (data: Partial<Task>) => {
+    const handleSubmitTask = async (data: TaskInput) => {
         if (editingTask) {
             await updateTask(editingTask.id, data)
         } else {

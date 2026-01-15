@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors, pointerWithin } from '@dnd-kit/core'
-import { Task, Group, Holiday } from '../../types'
+import { Task, Group, Holiday, TaskInput } from '../../types'
 
 import { DraggableTask } from '../Tasks/DraggableTask'
 import { TaskDetailView } from '../Tasks/TaskDetailView'
@@ -15,6 +15,7 @@ import {
     getCustomWeekInfo,
     getWeeksOfMonth,
     weekInfoToString,
+    generateRecurringDates,
     WeekInfo
 } from '../../utils/dateUtils'
 import { getHolidays } from '../../utils/holidayUtils'
@@ -28,7 +29,7 @@ interface CalendarViewProps {
     onEdit: (task: Task) => void
     onDelete: (id: string) => void
     onAddTask: (initialData?: Partial<Task>) => void
-    onUpdateTask?: (id: string, updates: Partial<Task>) => Promise<void>
+    onUpdateTask?: (id: string, updates: TaskInput) => Promise<void>
 }
 
 type ViewMode = 'month' | 'week' | 'day'
@@ -67,6 +68,63 @@ export function CalendarView({ tasks, groups, onToggle, onToggleSubtask, onEdit,
         const group = groups.find(g => g.id === groupId)
         return group?.color || null
     }
+
+    // Calcular tarefas combinadas (Reais + Virtuais)
+    const combinedTasks = useMemo(() => {
+        // Definir intervalo de visualização para projeção
+        let startRange: Date
+        let endRange: Date
+
+        if (viewMode === 'month') {
+            startRange = calendarDays[0]
+            endRange = calendarDays[calendarDays.length - 1]
+        } else if (viewMode === 'week' && currentWeek) {
+            startRange = currentWeek.startDate
+            endRange = currentWeek.endDate
+        } else {
+            // Day view
+            startRange = selectedDate || currentDate
+            endRange = selectedDate || currentDate
+        }
+
+        // 1. Identificar tarefas recorrentes e gerar virtuais
+        const virtualTasks: Task[] = []
+        const realTasksMap = new Set<string>()
+
+        // Mapear tarefas reais para evitar duplicação (Chave: "YYYY-MM-DD|Título")
+        tasks.forEach(t => {
+            if (t.dueDate) {
+                realTasksMap.add(`${t.dueDate}|${t.title}`)
+            }
+        })
+
+        tasks.filter(t => t.isRecurring).forEach(task => {
+            const dates = generateRecurringDates(task, startRange, endRange)
+
+            dates.forEach(date => {
+                const key = `${date}|${task.title}`
+
+                // Só adiciona se não houver conflito com tarefa real
+                if (!realTasksMap.has(key)) {
+                    realTasksMap.add(key)
+
+                    virtualTasks.push({
+                        ...task,
+                        id: `virtual-${task.id}-${date}`,
+                        // @ts-ignore - Adicionando propriedade temporária para lookup
+                        _originalId: task.id,
+                        dueDate: date,
+                        isVirtual: true,
+                        isCompleted: false, // Virtuais são sempre "a fazer"
+                        subtasks: task.subtasks?.map(s => ({ ...s, isCompleted: false })) // Resetar subtarefas
+                    })
+                }
+            })
+        })
+
+        // Combinar reais + virtuais
+        return [...tasks, ...virtualTasks]
+    }, [tasks, viewMode, calendarDays, currentWeek, selectedDate, currentDate])
 
     // Navegar entre meses
     const navigateMonth = (direction: 'prev' | 'next') => {
@@ -197,6 +255,26 @@ export function CalendarView({ tasks, groups, onToggle, onToggleSubtask, onEdit,
         }
     }
 
+    // Handler para edição (intercepta tarefas virtuais)
+    const handleProxyEdit = (task: Task) => {
+        if (task.isVirtual) {
+            // @ts-ignore
+            const originalId = task._originalId
+            const originalTask = tasks.find(t => t.id === originalId) ||
+                tasks.find(t => t.title === task.title && t.isRecurring && t.groupId === task.groupId)
+
+            if (originalTask) {
+                if (window.confirm('Esta é uma ocorrência futura. Deseja editar a regra de recorrência original?')) {
+                    onEdit(originalTask)
+                }
+            } else {
+                alert('Não foi possível encontrar a tarefa original.')
+            }
+        } else {
+            onEdit(task)
+        }
+    }
+
     // Handler para Drag & Drop
     const handleDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event
@@ -304,30 +382,81 @@ export function CalendarView({ tasks, groups, onToggle, onToggleSubtask, onEdit,
     const getTasksToDisplay = () => {
         const currentYearMonth = getYearMonth(currentDate)
 
-        // Tarefas do mês (scope='month')
-        const monthTasks = tasks.filter(task =>
+        // Definir intervalo de visualização para projeção
+        let startRange: Date
+        let endRange: Date
+
+        if (viewMode === 'month') {
+            startRange = calendarDays[0]
+            endRange = calendarDays[calendarDays.length - 1]
+        } else if (viewMode === 'week' && currentWeek) {
+            startRange = currentWeek.startDate
+            endRange = currentWeek.endDate
+        } else {
+            // Day view
+            startRange = selectedDate || currentDate
+            endRange = selectedDate || currentDate
+        }
+
+        // 1. Identificar tarefas recorrentes e gerar virtuais
+        const virtualTasks: Task[] = []
+        const realTasksMap = new Set<string>()
+
+        // Mapear tarefas reais para evitar duplicação (Chave: "YYYY-MM-DD|Título")
+        tasks.forEach(t => {
+            if (t.dueDate) {
+                realTasksMap.add(`${t.dueDate}|${t.title}`)
+            }
+        })
+
+        tasks.filter(t => t.isRecurring).forEach(task => {
+            const dates = generateRecurringDates(task, startRange, endRange)
+
+            dates.forEach(date => {
+                const key = `${date}|${task.title}`
+
+                // Só adiciona se não houver conflito com tarefa real
+                if (!realTasksMap.has(key)) {
+                    // Adiciona ao mapa para evitar duplicatas entre as próprias virtuais
+                    // (ex: tarefa de segunda projeta quarta, tarefa de terça projeta quarta)
+                    realTasksMap.add(key)
+
+                    virtualTasks.push({
+                        ...task,
+                        id: `virtual-${task.id}-${date}`,
+                        // @ts-ignore - Adicionando propriedade temporária para lookup
+                        _originalId: task.id,
+                        dueDate: date,
+                        isVirtual: true,
+                        isCompleted: false, // Virtuais são sempre "a fazer"
+                        subtasks: task.subtasks?.map(s => ({ ...s, isCompleted: false })) // Resetar subtarefas
+                    })
+                }
+            })
+        })
+
+        // Combinar reais + virtuais
+        const allTasks = [...tasks, ...virtualTasks]
+
+        // 2. Filtragem normal usando a lista combinada
+        // Tarefas do mês
+        const monthTasks = allTasks.filter(task =>
             task.scope === 'month' && task.targetMonth === currentYearMonth
         )
 
-        // Tarefas do dia selecionado (se houver)
+        // Tarefas do dia selecionado
         const dayTasks = selectedDate
-            ? tasks.filter(task => {
+            ? allTasks.filter(task => {
                 const dateStr = formatDateToISO(selectedDate)
-                // Aceitar tarefas com scope='date' OU tarefas sem scope mas com dueDate válido
-                if (task.scope === 'date' && task.dueDate === dateStr) {
-                    return true
-                }
-                // Fallback: tarefas antigas sem scope mas com dueDate
-                if (!task.scope && task.dueDate === dateStr) {
-                    return true
-                }
+                if (task.scope === 'date' && task.dueDate === dateStr) return true
+                if (!task.scope && task.dueDate === dateStr) return true
                 return false
             })
             : []
 
-        // Tarefas da semana (scope='week')
+        // Tarefas da semana
         const weekTasks = currentWeek
-            ? tasks.filter(task =>
+            ? allTasks.filter(task =>
                 task.scope === 'week' && task.targetWeek === weekInfoToString(currentWeek)
             )
             : []
@@ -339,7 +468,7 @@ export function CalendarView({ tasks, groups, onToggle, onToggleSubtask, onEdit,
 
     // Tarefas para o side panel (usa sidePanelDate)
     const sidePanelTasks = sidePanelDate
-        ? tasks.filter(task => {
+        ? combinedTasks.filter(task => {
             const dateStr = formatDateToISO(sidePanelDate)
             if (task.scope === 'date' && task.dueDate === dateStr) {
                 return true
@@ -460,7 +589,7 @@ export function CalendarView({ tasks, groups, onToggle, onToggleSubtask, onEdit,
                                 days={calendarDays}
                                 currentYear={currentYear}
                                 currentMonth={currentMonth}
-                                tasks={tasks}
+                                tasks={combinedTasks}
                                 groups={groups}
                                 holidays={holidays}
                                 onDayClick={handleDayClick}
@@ -470,10 +599,10 @@ export function CalendarView({ tasks, groups, onToggle, onToggleSubtask, onEdit,
                         ) : viewMode === 'week' && currentWeek ? (
                             <WeekGrid
                                 weekInfo={currentWeek}
-                                tasks={tasks}
+                                tasks={combinedTasks}
                                 groups={groups}
                                 onToggle={onToggle}
-                                onEdit={onEdit}
+                                onEdit={handleProxyEdit}
                                 onDelete={onDelete}
                                 onDayClick={handleDayClick}
                                 onAddTask={onAddTask}
@@ -482,10 +611,10 @@ export function CalendarView({ tasks, groups, onToggle, onToggleSubtask, onEdit,
                         ) : viewMode === 'day' && selectedDate ? (
                             <DayGrid
                                 selectedDate={selectedDate}
-                                tasks={tasks}
+                                tasks={combinedTasks}
                                 groups={groups}
                                 onToggle={onToggle}
-                                onEdit={onEdit}
+                                onEdit={handleProxyEdit}
                                 onDelete={onDelete}
                                 onAddTask={onAddTask}
                                 onDayClick={handleDayClick}
@@ -508,7 +637,7 @@ export function CalendarView({ tasks, groups, onToggle, onToggleSubtask, onEdit,
                                                 task={task}
                                                 groupColor={getGroupColor(task.groupId)}
                                                 onToggle={onToggle}
-                                                onEdit={onEdit}
+                                                onEdit={handleProxyEdit}
                                                 onDelete={onDelete}
                                             />
                                         ))
@@ -533,7 +662,7 @@ export function CalendarView({ tasks, groups, onToggle, onToggleSubtask, onEdit,
                                                 task={task}
                                                 groupColor={getGroupColor(task.groupId)}
                                                 onToggle={onToggle}
-                                                onEdit={onEdit}
+                                                onEdit={handleProxyEdit}
                                                 onDelete={onDelete}
                                             />
                                         ))
@@ -601,7 +730,7 @@ export function CalendarView({ tasks, groups, onToggle, onToggleSubtask, onEdit,
                                                                 groupColor={getGroupColor(task.groupId)}
                                                                 onToggle={onToggle}
                                                                 onToggleSubtask={onToggleSubtask}
-                                                                onEdit={onEdit}
+                                                                onEdit={handleProxyEdit}
                                                                 onDelete={onDelete}
                                                             />
                                                             {hasRichContent && (

@@ -33,6 +33,13 @@ export interface Task {
     recurrenceDays?: number[] | null // 0-6 (Dom-Sab)
     recurrenceEndDate?: string | null
     parentTaskId?: string | null
+
+    // UI Only
+    isVirtual?: boolean
+}
+
+export type TaskInput = Omit<Partial<Task>, 'subtasks'> & {
+    subtasks?: Partial<Subtask>[]
 }
 
 export interface Group {
@@ -50,8 +57,8 @@ export interface Holiday {
 
 export interface ElectronAPI {
     getTasks: () => Promise<Task[]>
-    addTask: (task: Partial<Task>) => Promise<Task>
-    updateTask: (id: string, updates: Partial<Task>) => Promise<Task>
+    addTask: (task: TaskInput) => Promise<Task>
+    updateTask: (id: string, updates: TaskInput) => Promise<Task>
     deleteTask: (id: string) => Promise<boolean>
     getGroups: () => Promise<Group[]>
     addGroup: (group: Partial<Group>) => Promise<Group>

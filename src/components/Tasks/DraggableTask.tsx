@@ -17,14 +17,20 @@ export function DraggableTask({ task, groupColor, onToggle, onToggleImportant, o
         data: {
             task,
             type: 'task'
-        }
+        },
+        disabled: task.isVirtual // Desabilita arrastar para tarefas virtuais
     })
 
     const style = transform ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-        opacity: isDragging ? 0.5 : 1,
-        cursor: isDragging ? 'grabbing' : 'grab'
-    } : undefined
+        opacity: isDragging ? 0.5 : (task.isVirtual ? 0.6 : 1),
+        cursor: isDragging ? 'grabbing' : 'grab',
+        filter: task.isVirtual ? 'grayscale(0.8)' : 'none'
+    } : {
+        // Estilo para tarefas virtuais estáticas (não arrastando)
+        opacity: task.isVirtual ? 0.6 : 1,
+        filter: task.isVirtual ? 'grayscale(0.8)' : 'none'
+    }
 
     return (
         <div ref={setNodeRef} style={style} {...listeners} {...attributes}>

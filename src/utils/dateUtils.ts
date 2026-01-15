@@ -300,3 +300,94 @@ export function getCalendarWeeksForMonth(year: number, month: number): Date[][] 
 
     return weeks
 }
+
+/**
+ * Converte string ISO (YYYY-MM-DD) para Date local (meia-noite)
+ * Evita problemas de fuso horário onde new Date("2023-10-27") seria UTC e .getDate() retornaria 26
+ */
+export function parseISOToLocal(isoString: string): Date {
+    const [year, month, day] = isoString.split('-').map(Number)
+    return new Date(year, month - 1, day)
+}
+
+/**
+ * Gera datas futuras para uma tarefa recorrente dentro de um intervalo
+ */
+export function generateRecurringDates(
+    task: {
+        dueDate?: string | null
+        isRecurring?: boolean
+        recurrencePattern?: string | null
+        recurrenceInterval?: number | null
+        recurrenceDays?: number[] | null
+        recurrenceEndDate?: string | null
+    },
+    startRange: Date,
+    endRange: Date
+): string[] {
+    if (!task.isRecurring || !task.dueDate || !task.recurrencePattern) return []
+
+    const results: string[] = []
+
+    // Começa a projeção a partir da data de vencimento atual
+    // A data atual (task.dueDate) já é uma tarefa real, então começamos a projetar a PRÓXIMA
+    let current = parseISOToLocal(task.dueDate)
+    const interval = task.recurrenceInterval || 1
+    const endRecurrence = task.recurrenceEndDate ? parseISOToLocal(task.recurrenceEndDate) : null
+
+    // Limite de segurança para evitar loops infinitos
+    let count = 0
+    const LIMIT = 365 // Projetar no máximo 1 ano ou ~52 semanas
+
+    // Avançar para a primeira ocorrência FUTURA
+    // Começamos o loop já calculando o próximo passo
+    while (count < LIMIT) {
+        // Cálculo da próxima data (cópia da lógica do backend, mas usando Local Time)
+        const nextDate = new Date(current)
+
+        if (task.recurrencePattern === 'daily') {
+            nextDate.setDate(current.getDate() + interval)
+        }
+        else if (task.recurrencePattern === 'weekly') {
+            if (task.recurrenceDays && task.recurrenceDays.length > 0) {
+                const currentDay = current.getDay() // 0-6
+                const days = task.recurrenceDays.sort((a, b) => a - b)
+                const nextInWeek = days.find(d => d > currentDay)
+
+                if (nextInWeek !== undefined) {
+                    nextDate.setDate(current.getDate() + (nextInWeek - currentDay))
+                } else {
+                    const daysUntilNextSunday = 7 - currentDay
+                    const weeksToSkipDays = (interval - 1) * 7
+                    const dayOffset = days[0]
+                    nextDate.setDate(current.getDate() + daysUntilNextSunday + weeksToSkipDays + dayOffset)
+                }
+            } else {
+                nextDate.setDate(current.getDate() + (7 * interval))
+            }
+        }
+        else if (task.recurrencePattern === 'monthly') {
+            nextDate.setMonth(current.getMonth() + interval)
+        }
+        else if (task.recurrencePattern === 'yearly') {
+            nextDate.setFullYear(current.getFullYear() + interval)
+        }
+
+        // Verificações
+        if (endRecurrence && nextDate > endRecurrence) break
+
+        // Se a data gerada for depois do fim do intervalo de visualização, podemos parar
+        if (nextDate > endRange) break
+
+        // Se a data gerada estiver dentro do intervalo (e for maior que a atual, o que é garantido pela lógica)
+        if (nextDate >= startRange) {
+            results.push(formatDateToISO(nextDate))
+        }
+
+        // Atualizar current para a próxima iteração
+        current = nextDate
+        count++
+    }
+
+    return results
+}

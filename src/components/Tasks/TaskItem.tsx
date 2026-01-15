@@ -22,8 +22,11 @@ export function TaskItem({ task, groupColor, onToggle, onToggleImportant, onEdit
                 <input
                     type="checkbox"
                     checked={task.isCompleted}
-                    onChange={() => onToggle(task.id)}
+                    onChange={() => !task.isVirtual && onToggle(task.id)}
                     className="task-checkbox"
+                    disabled={task.isVirtual}
+                    title={task.isVirtual ? "Esta é uma projeção futura. Complete a tarefa atual primeiro." : "Marcar como concluída"}
+                    style={task.isVirtual ? { cursor: 'not-allowed', opacity: 0.5 } : {}}
                 />
             </div>
 
